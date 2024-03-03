@@ -21,13 +21,11 @@ class DashBoardPage extends StatefulWidget {
 }
 
 class _DashBoardPageState extends State<DashBoardPage> {
-  Barcode? scannedResult;
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () => AppPopUps.showConfirmDialog(
-          message: "Are you sure to discard post",
+          message: "Are you sure to exit app",
           onSubmit: () {
             Get.back();
           }),
@@ -54,7 +52,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
                             alignment: Alignment.bottomCenter,
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 60),
-                              child: scannedResult != null
+                              child: controller.scannedResult != null
                                   ? Row(
                                       children: [
                                         hSpace,
@@ -63,7 +61,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
                                             buttonText: "Rescan",
                                             onTap: () {
                                               setState(() {
-                                                scannedResult = null;
+                                                controller.scannedResult = null;
                                                 controller.resumeCamera();
                                               });
                                             },
@@ -74,11 +72,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
                                           child: MyButton(
                                             buttonText: "Proceed",
                                             onTap: () {
-                                              if (scannedResult != null) {
+                                              if (controller.scannedResult !=
+                                                  null) {
                                                 controller
                                                     .fetchDataAndProceedToNextScreen(
-                                                        scannedResult:
-                                                            scannedResult!);
+                                                        scannedResult: controller
+                                                            .scannedResult!);
                                               }
                                             },
                                           ),
@@ -163,17 +162,17 @@ class _DashBoardPageState extends State<DashBoardPage> {
         ///setting frame refresh on camera recreate to support hard reload....
         try {
           if (Platform.isAndroid) {
-            qrController.pauseCamera();
+            controller.pauseCamera();
           }
-          qrController.resumeCamera();
+          controller.resumeCamera();
           qrController.scannedDataStream.listen((scanData) {
             print("******listening to stream for qr code******");
             setState(() {
-              if (scannedResult?.code != "") {
-                printWrapped("Received QR: ${scannedResult?.code}");
+              if (controller.scannedResult?.code != "") {
+                printWrapped("Received QR: ${controller.scannedResult?.code}");
                 Vibration.vibrate(duration: 500);
-                scannedResult = scanData;
-                qrController.pauseCamera();
+                controller.scannedResult = scanData;
+                controller.pauseCamera();
                 // qrController.dispose(); // Stop Camera functions
 
               }

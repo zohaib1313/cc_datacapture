@@ -15,7 +15,7 @@ class LoadingWidget extends StatelessWidget {
       width: width,
       height: height,
       padding: const EdgeInsets.all(10),
-      color: loaderColor ?? Get.theme.secondaryHeaderColor.withOpacity(0.5),
+      color: loaderColor ?? Colors.black.withOpacity(0.2),
       child: Stack(
         children: [
           const Center(

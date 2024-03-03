@@ -5,6 +5,7 @@ import 'package:cc_datacapture/app_utils/user_defaults.dart';
 import 'package:cc_datacapture/common/app_pop_ups.dart';
 import 'package:cc_datacapture/models/auth_model.dart';
 import 'package:cc_datacapture/models/product_model.dart';
+import 'package:cc_datacapture/pages/product_details/product_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +13,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class DashboardPageController extends GetxController {
   RxBool isLoading = false.obs;
+  Barcode? scannedResult;
 
   @override
   void onInit() {
@@ -101,7 +103,12 @@ class DashboardPageController extends GetxController {
       String statusCode = productModel.meta?.statusCode.toString() ?? "";
       if (statusCode == "200") {
         ////everything is ok proceed to next screen...
-
+        await Get.toNamed(ProductDetailPage.id,
+            arguments: [scannedResult.code, productModel]);
+        isLoading.value = true;
+        this.scannedResult = null;
+        resumeCamera();
+        isLoading.value = false;
       } else if (statusCode == "401") {
         await updateToken();
         fetchDataAndProceedToNextScreen(scannedResult: scannedResult);

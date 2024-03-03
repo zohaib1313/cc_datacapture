@@ -29,6 +29,14 @@ dependencies:
   google_fonts: ^4.0.1
   qr_code_scanner: ^1.0.1
   vibration: ^1.7.4-nullsafety.0
+  advance_image_picker: ^0.1.7+1
+  intl:
+  external_path: ^1.0.3
+  device_info_plus:
+
+
+
+
 
 
 
