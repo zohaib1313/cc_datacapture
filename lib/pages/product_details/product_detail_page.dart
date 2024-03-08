@@ -4,13 +4,15 @@ import 'package:cc_datacapture/common/common_widgets.dart';
 import 'package:cc_datacapture/common/loading_widget.dart';
 import 'package:cc_datacapture/common/spaces_boxes.dart';
 import 'package:cc_datacapture/common/styles.dart';
+import 'package:cc_datacapture/common/widget_helper_mixins.dart';
 import 'package:cc_datacapture/generated/assets.dart';
 import 'package:cc_datacapture/models/product_model.dart';
 import 'package:cc_datacapture/pages/product_details/controllers/product_detail_page_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ProductDetailPage extends GetView<ProductDetailPageController> {
+class ProductDetailPage extends GetView<ProductDetailPageController>
+    with WidgetHelperMixin {
   ProductDetailPage({Key? key}) : super(key: key);
   static const id = "/ProductDetailPage";
   final ProductModel? productModel = Get.arguments[1];
@@ -66,15 +68,15 @@ class ProductDetailPage extends GetView<ProductDetailPageController> {
                       vSpace,
                       Text("Product Details",
                           style: AppTextStyles.textStyleBoldBodyMedium),
-                      _getRowItem(
+                      getRowItem(
                           key: "Item code:",
                           value:
                               productModel?.data?.itemDetails?.itemCode ?? ''),
-                      _getRowItem(
+                      getRowItem(
                           key: "Item price:",
                           value:
                               productModel?.data?.itemDetails?.posPrice ?? ''),
-                      _getRowItem(
+                      getRowItem(
                           key: "Item description:",
                           isRow: false,
                           value:
@@ -164,41 +166,6 @@ class ProductDetailPage extends GetView<ProductDetailPageController> {
           }),
         ),
       ),
-    );
-  }
-
-  Widget _getRowItem({
-    required String key,
-    required String value,
-    bool isRow = true,
-  }) {
-    return Container(
-      margin: const EdgeInsets.all(2),
-      padding: const EdgeInsets.all(1),
-      color: Colors.black.withOpacity(0.1),
-      width: Get.width,
-      child: isRow
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(key, style: AppTextStyles.textStyleBoldBodySmall),
-                hSpace,
-                Flexible(
-                    child: Text(value,
-                        style: AppTextStyles.textStyleNormalBodySmall)),
-              ],
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Text(key, style: AppTextStyles.textStyleBoldBodySmall),
-                hSpace,
-                Text(value, style: AppTextStyles.textStyleNormalBodySmall),
-              ],
-            ),
     );
   }
 }

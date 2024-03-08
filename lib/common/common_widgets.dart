@@ -2,36 +2,6 @@ import 'package:cc_datacapture/common/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-
-class SvgViewer extends StatelessWidget {
-  final String svgPath;
-  final double? height;
-  final double? width;
-  final Color? color;
-  final BoxFit fit;
-
-  const SvgViewer(
-      {Key? key,
-      required this.svgPath,
-      this.height,
-      this.width,
-      this.color,
-      this.fit = BoxFit.contain})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      svgPath,
-      key: key,
-      color: color,
-      height: height ?? 30.h,
-      width: width ?? 30.w,
-      fit: fit,
-    );
-  }
-}
 
 class MyButton extends StatelessWidget {
   final String buttonText;
@@ -48,8 +18,10 @@ class MyButton extends StatelessWidget {
   final TextStyle? textStyle;
   final double? leftPadding;
   final double? rightPading;
+  final bool enabled;
   final Widget? child;
   final BorderRadiusGeometry? borderRadius;
+  final Gradient? gradient;
 
   const MyButton(
       {Key? key,
@@ -68,13 +40,15 @@ class MyButton extends StatelessWidget {
       this.leftPadding,
       this.child,
       this.borderRadius,
-      this.rightPading})
+      this.gradient,
+      this.rightPading,
+      this.enabled = true})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       onDoubleTap: () {},
       child: Padding(
         padding: EdgeInsets.only(
@@ -82,7 +56,7 @@ class MyButton extends StatelessWidget {
             right: rightPading == null ? 0.w : rightPading!),
         child: Container(
           width: width ?? 400.w,
-          height: height ?? 55.h,
+          height: height ?? 65.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             border: borderColor == null
@@ -92,7 +66,8 @@ class MyButton extends StatelessWidget {
                   ),
             borderRadius: borderRadius ??
                 BorderRadius.all(Radius.circular(cornerRadius ?? 26.r)),
-            color: color ?? Colors.white,
+            color: enabled ? color ?? Colors.white : Colors.grey,
+            gradient: enabled == true ? gradient : null,
             boxShadow: [
               if (color == AppColors.blackColor)
                 BoxShadow(
@@ -114,17 +89,23 @@ class MyButton extends StatelessWidget {
                               padding: const EdgeInsets.all(4),
                               child: prefixIcon)
                           : const IgnorePointer(),
-                      Padding(
-                        padding: EdgeInsets.all(padding ?? 0.0),
-                        child: Text(
-                          buttonText,
-                          textAlign: TextAlign.center,
-                          style: textStyle ??
-                              AppTextStyles.textStyleBoldBodySmall.copyWith(
-                                  color: textColor ?? AppColors.blackColor),
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: EdgeInsets.all(padding ?? 0.0),
+                          child: Text(
+                            buttonText,
+                            textAlign: TextAlign.center,
+                            style: textStyle ??
+                                AppTextStyles.textStyleBoldBodySmall.copyWith(
+                                    color: textColor ?? AppColors.blackColor),
+                          ),
                         ),
                       ),
-                      postFixIcon ?? const IgnorePointer(),
+                      if (postFixIcon != null)
+                        Expanded(
+                          child: postFixIcon!,
+                        )
                     ],
                   )),
         ),

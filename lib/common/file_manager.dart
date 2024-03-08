@@ -19,20 +19,33 @@ class FileManager {
       try {
         var externalDir =
             (await ExternalPath.getExternalStorageDirectories()).first;
-        // Create a directory with the barcode code as its name
+
         Directory folderDir =
             Directory('$externalDir/${AppConstants.appName}/$barcode');
-        await folderDir.create(recursive: true);
 
-        // Create a text file within the folder to store product details
-        File textFile = File('${folderDir.path}/${barcode}_product.txt');
-        await textFile.writeAsString(textToSave);
+        // Check if the folder already exists
+        if (!await folderDir.exists()) {
+          await folderDir.create(recursive: true);
+        }
+        // If the folder already exists, count the existing image files
+        int alreadyPresentFileCount =
+            folderDir.listSync().whereType<File>().length;
 
-        // Create image files within the folder
+        // Rename the images following the pattern 'image_{existingFileCount + i}.jpg'
         for (int i = 0; i < images.length; i++) {
-          File imageFile = File('${folderDir.path}/image_$i.jpg');
+          File imageFile = File(
+              '${folderDir.path}/image_${i + alreadyPresentFileCount}.jpg');
           await imageFile.writeAsBytes(await images[i].readAsBytes());
         }
+
+        // Write text file
+        File textFile = File('${folderDir.path}/${barcode}_product.txt');
+        if (await textFile.exists()) {
+          String existingText = await textFile.readAsString();
+          textToSave = '$existingText\n\n$textToSave'; // Append new text
+        }
+        await textFile.writeAsString(textToSave);
+
         AppPopUps.showSnackBar(
             message: "Saved at ${folderDir.path}", color: Colors.green);
         print("Saved at ${folderDir.path}");

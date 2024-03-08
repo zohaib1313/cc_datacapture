@@ -1,23 +1,35 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:cc_datacapture/app_utils/helpers.dart';
 import 'package:cc_datacapture/app_utils/user_defaults.dart';
 import 'package:cc_datacapture/common/app_pop_ups.dart';
 import 'package:cc_datacapture/models/auth_model.dart';
 import 'package:cc_datacapture/models/product_model.dart';
-import 'package:cc_datacapture/pages/product_details/product_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+import '../../../common/file_manager.dart';
+
 class DashboardPageController extends GetxController {
   RxBool isLoading = false.obs;
-  Barcode? scannedResult;
+
+  ProductModel? productModel;
+
+  List<File> imagesList = <File>[];
+
+  late CameraController cameraController;
+  late List<CameraDescription> camerasList;
+
+  RxString scannedBarCode = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
+
     if (UserDefaults.getUserSession()?.accessToken == null) {
       updateToken();
     }
@@ -27,31 +39,19 @@ class DashboardPageController extends GetxController {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
   void toggleFlash() async {
-    isLoading.value = true;
-
     await qrViewController?.toggleFlash();
-    isLoading.value = false;
   }
 
   void flipCamera() async {
-    isLoading.value = true;
-
     await qrViewController?.flipCamera();
-    isLoading.value = false;
   }
 
   void resumeCamera() async {
-    isLoading.value = true;
-
     await qrViewController?.resumeCamera();
-    isLoading.value = false;
   }
 
   void pauseCamera() async {
-    isLoading.value = true;
-
     await qrViewController?.pauseCamera();
-    isLoading.value = false;
   }
 
   Future<bool?> getFlashStatus() async {
@@ -99,22 +99,20 @@ class DashboardPageController extends GetxController {
     printWrapped(resBody);
 
     if (streamResponse.statusCode == 200) {
-      ProductModel productModel = ProductModel.fromJson(jsonDecode(resBody));
-      String statusCode = productModel.meta?.statusCode.toString() ?? "";
+      final tempModel = ProductModel.fromJson(jsonDecode(resBody));
+      String statusCode = tempModel.meta?.statusCode.toString() ?? "";
       if (statusCode == "200") {
-        ////everything is ok proceed to next screen...
-        await Get.toNamed(ProductDetailPage.id,
-            arguments: [scannedResult.code, productModel]);
         isLoading.value = true;
-        this.scannedResult = null;
-        resumeCamera();
+        productModel = tempModel;
         isLoading.value = false;
+        scannedBarCode.value = scannedResult.code ?? '';
       } else if (statusCode == "401") {
         await updateToken();
         fetchDataAndProceedToNextScreen(scannedResult: scannedResult);
       } else {
         AppPopUps.showSnackBar(
-            message: productModel.meta?.message ?? "something went wrong");
+            message: tempModel.meta?.message ?? "something went wrong");
+        resumeCamera();
       }
     } else if (streamResponse.statusCode == 401) {
       await updateToken();
@@ -142,5 +140,35 @@ class DashboardPageController extends GetxController {
       print(response.reasonPhrase);
     }
     isLoading.value = false;
+  }
+
+  void saveImagesInFolder({required String barCode}) async {
+    if (imagesList.isEmpty) {
+      AppPopUps.showSnackBar(message: "Add images");
+      return;
+    } else if (productModel == null) {
+      AppPopUps.showSnackBar(message: "Barcode not scanned");
+      return;
+    }
+    isLoading.value = true;
+    await FileManager.createFolderAndFiles(
+      barcode: barCode,
+      textToSave: productModel?.toJson().toString() ?? '',
+      images: imagesList,
+    );
+    scannedBarCode.value = '';
+    productModel = null;
+    imagesList.clear();
+    isLoading.value = false;
+  }
+
+  void takePictureAndSave() async {
+    await cameraController.setFocusMode(FocusMode.locked);
+    await cameraController.setExposureMode(ExposureMode.locked);
+    await cameraController.setFlashMode(FlashMode.off);
+    XFile file = await cameraController.takePicture();
+
+    imagesList.add(File(file.path));
+    update(['list']);
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../common/spaces_boxes.dart';
 import '../common/styles.dart';
@@ -25,8 +24,8 @@ class AppPopUps {
                   },
                   child: Center(
                     child: Container(
-                      width: context.width * 0.8,
-                      height: 200.h,
+                      width: 300,
+                      height: 200,
                       padding: EdgeInsets.all(20.h),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
@@ -55,11 +54,11 @@ class AppPopUps {
                                   }
                                   Navigator.pop(context, true);
                                 },
-                                height: 45.h,
+                                height: 45,
                                 cornerRadius: 6,
                                 borderColor: Colors.black,
                                 textStyle: AppTextStyles
-                                    .textStyleNormalBodyMedium
+                                    .textStyleNormalBodySmall
                                     .copyWith(color: Colors.black),
                               )),
                               hSpace,
@@ -69,12 +68,12 @@ class AppPopUps {
                                 onTap: () {
                                   Navigator.pop(context, false);
                                 },
-                                height: 45.h,
+                                height: 45,
                                 cornerRadius: 6,
                                 color: Colors.white,
                                 borderColor: Colors.black,
                                 textStyle:
-                                    AppTextStyles.textStyleNormalBodyMedium,
+                                    AppTextStyles.textStyleNormalBodySmall,
                               )),
                             ],
                           )
